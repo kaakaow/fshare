@@ -235,7 +235,7 @@ def send_file_route():
     cleanup_old_files(receiver_folder)
 
     filename = secure_filename(f.filename)
-    path = os.path.join(receiver_folder, f"{sender}")
+    path = os.path.join(receiver_folder, f"{sender}_{filename}")
     f.save(path)
 
     return render_template_string(TEMPLATE,

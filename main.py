@@ -20,12 +20,12 @@ TEMPLATE = '''
 <style>
 body {
   font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
   margin: 0;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  transition: background 0.5s, color 0.5s;
 }
 .container {
   background: rgba(255, 255, 255, 0.2);
@@ -36,12 +36,8 @@ body {
   width: 100%;
   max-width: 420px;
   text-align: center;
-  color: #fff;
 }
-h1 {
-  margin-bottom: 20px;
-  font-size: 1.8em;
-}
+h1 { margin-bottom: 20px; font-size: 1.8em; }
 input[type=text], input[type=file] {
   width: 90%;
   padding: 12px;
@@ -61,10 +57,7 @@ button {
   margin-top: 10px;
   transition: all 0.3s ease;
 }
-button:hover {
-  background: #45a049;
-  transform: scale(1.05);
-}
+button:hover { background: #45a049; transform: scale(1.05); }
 .file-card {
   background: rgba(255, 255, 255, 0.1);
   padding: 12px;
@@ -72,17 +65,45 @@ button:hover {
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
-a {
+a { text-decoration: none; color: #ffeb3b; font-weight: bold; }
+a:hover { text-decoration: underline; }
+.back-btn {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: #333;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 8px;
   text-decoration: none;
-  color: #ffeb3b;
-  font-weight: bold;
+  font-size: 14px;
 }
-a:hover {
-  text-decoration: underline;
+.back-btn:hover { background: #555; }
+.light-theme {
+  background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+  color: #000;
+}
+.dark-theme {
+  background: linear-gradient(135deg, #232526 0%, #414345 100%);
+  color: #fff;
 }
 </style>
+<script>
+function toggleTheme() {
+    let current = localStorage.getItem("theme") || "light";
+    let newTheme = current === "light" ? "dark" : "light";
+    localStorage.setItem("theme", newTheme);
+    applyTheme();
+}
+function applyTheme() {
+    let theme = localStorage.getItem("theme") || "light";
+    document.body.className = theme + "-theme";
+}
+window.onload = applyTheme;
+</script>
 </head>
 <body>
+<a href="/menu_redirect/{{ username }}" class="back-btn" {% if stage == 'login' or stage == 'menu' %}style="display:none;"{% endif %}>⬅ Takaisin</a>
 <div class="container">
     {% if stage == 'login' %}
         <h1>Kirjaudu</h1>
@@ -95,8 +116,11 @@ a:hover {
         <form action="/send" method="get" style="margin-bottom:10px;">
             <button type="submit" name="username" value="{{ username }}">📤 Lähetä tiedosto</button>
         </form>
-        <form action="/receive" method="get">
+        <form action="/receive" method="get" style="margin-bottom:10px;">
             <button type="submit" name="username" value="{{ username }}">📥 Nouda tiedostoja</button>
+        </form>
+        <form action="/settings" method="get">
+            <button type="submit" name="username" value="{{ username }}">⚙️ Asetukset</button>
         </form>
     {% elif stage == 'send' %}
         <h1>📤 Lähetä tiedosto</h1>
@@ -115,6 +139,9 @@ a:hover {
         {% else %}
             <p>Ei uusia tiedostoja.</p>
         {% endif %}
+    {% elif stage == 'settings' %}
+        <h1>⚙️ Asetukset</h1>
+        <button onclick="toggleTheme()">Vaihda teema</button>
     {% elif stage == 'sent' %}
         <h1>✅ Tiedosto lähetetty käyttäjälle {{ receiver }}!</h1>
         <a href="/menu_redirect/{{ sender }}">⬅ Takaisin valikkoon</a>
@@ -219,6 +246,12 @@ def download(username, filename):
     if not os.path.exists(path):
         return "Tiedostoa ei löytynyt!"
     return send_file(path, as_attachment=True)
+
+
+@app.route('/settings')
+def settings():
+    username = request.args.get('username')
+    return render_template_string(TEMPLATE, stage='settings', username=username)
 
 
 if __name__ == "__main__":

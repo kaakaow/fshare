@@ -7,9 +7,9 @@ BASE_FOLDER = 'users'
 os.makedirs(BASE_FOLDER, exist_ok=True)
 
 MAX_FILE_SIZE = 50 * 1024 * 1024
-FILE_LIFETIME = 5 * 60  # 5 minuuttia
+FILE_LIFETIME = 5 * 60  
 
-# Uusi moderni HTML-template
+
 TEMPLATE = '''
 <!DOCTYPE html>
 <html lang="fi">
@@ -272,7 +272,6 @@ def settings():
 
 
 if __name__ == "__main__":
-    # Käynnistetään taustasiivous säikeessä
     cleanup_thread = threading.Thread(target=background_cleanup, daemon=True)
     cleanup_thread.start()
 

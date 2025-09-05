@@ -99,7 +99,23 @@ function applyTheme() {
     let theme = localStorage.getItem("theme") || "light";
     document.body.className = theme + "-theme";
 }
-window.onload = applyTheme;
+function saveLogin(username) {
+    localStorage.setItem("username", username);
+}
+function checkLogin() {
+    let savedUser = localStorage.getItem("username");
+    if (savedUser && window.location.pathname === "/") {
+        window.location.href = "/menu_redirect/" + savedUser;
+    }
+}
+function logout() {
+    localStorage.removeItem("username");
+    window.location.href = "/";
+}
+window.onload = function() {
+    applyTheme();
+    checkLogin();
+}
 </script>
 </head>
 <body>
@@ -107,8 +123,8 @@ window.onload = applyTheme;
 <div class="container">
     {% if stage == 'login' %}
         <h1>Kirjaudu</h1>
-        <form action="/menu" method="post">
-            <input type="text" name="username" placeholder="Käyttäjänimi" required><br>
+        <form action="/menu" method="post" onsubmit="saveLogin(document.getElementById('username').value)">
+            <input type="text" id="username" name="username" placeholder="Käyttäjänimi" required><br>
             <button type="submit">Jatka</button>
         </form>
     {% elif stage == 'menu' %}
@@ -141,7 +157,8 @@ window.onload = applyTheme;
         {% endif %}
     {% elif stage == 'settings' %}
         <h1>⚙️ Asetukset</h1>
-        <button onclick="toggleTheme()">Vaihda teema</button>
+        <button onclick="toggleTheme()">🎨 Vaihda teema</button><br><br>
+        <button onclick="logout()" style="background:#f44336;">🚪 Kirjaudu ulos</button>
     {% elif stage == 'sent' %}
         <h1>✅ Tiedosto lähetetty käyttäjälle {{ receiver }}!</h1>
         <a href="/menu_redirect/{{ sender }}">⬅ Takaisin valikkoon</a>
